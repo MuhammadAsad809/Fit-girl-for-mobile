@@ -285,31 +285,47 @@ fun GameDetailScreen(
                     )
                 } else if (repack != null) {
                     val r = repack
-                    // Full game via magnet/torrent
-                    if (!r.magnet.isNullOrBlank()) {
-                        LiquidGlassButton(
-                            text = "FULL GAME DOWNLOAD (TORRENT)",
-                            onClick = { openUrl(r.magnet!!) },
-                            isPrimary = true,
-                            trailingIcon = Icons.Default.Download,
-                            modifier = Modifier.fillMaxWidth()
+                    val parts = r.torrentParts
+                    if (parts.isNotEmpty()) {
+                        Text(
+                            text = "TORRENT PARTS — tap to open in torrent app",
+                            color = FitmanColors.TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
                         )
-                    }
-                    // Part / selective file mirrors
-                    val partMirrors = r.mirrors
-                    if (partMirrors.isNotEmpty()) {
-                        LiquidGlassButton(
-                            text = "PART DOWNLOAD (FILES)",
-                            onClick = {
-                                // open first mirror host page for selective files
-                                openUrl(partMirrors.first().url)
-                            },
-                            isPrimary = false,
-                            trailingIcon = Icons.Default.Folder,
-                            modifier = Modifier.fillMaxWidth()
+                        parts.forEachIndexed { index, part ->
+                            val label = when {
+                                part.name.isNotBlank() && !part.name.startsWith("magnet", true) ->
+                                    part.name.uppercase()
+                                parts.size == 1 -> "FULL GAME DOWNLOAD (TORRENT)"
+                                else -> "PART ${index + 1} DOWNLOAD (TORRENT)"
+                            }
+                            LiquidGlassButton(
+                                text = label,
+                                onClick = { openUrl(part.url) },
+                                isPrimary = index == 0,
+                                trailingIcon = Icons.Default.Download,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    } else if (r.mirrors.isNotEmpty()) {
+                        Text(
+                            text = "FILE MIRRORS",
+                            color = FitmanColors.TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                    }
-                    if (r.magnet.isNullOrBlank() && partMirrors.isEmpty()) {
+                        r.mirrors.take(8).forEach { m ->
+                            LiquidGlassButton(
+                                text = m.name.ifBlank { "Mirror" },
+                                onClick = { openUrl(m.url) },
+                                isPrimary = false,
+                                trailingIcon = Icons.Default.Folder,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    } else {
                         LiquidGlassButton(
                             text = "OPEN FITGIRL PAGE",
                             onClick = { openUrl(r.url) },

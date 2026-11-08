@@ -131,19 +131,31 @@ object FitGirlApi {
             }
 
             var magnet: String? = null
+            val magnets = mutableListOf<MirrorLink>()
             val mirrors = mutableListOf<MirrorLink>()
+            var magnetIndex = 0
 
             for (a in content.select("a[href]")) {
                 val href = a.attr("abs:href").ifBlank { a.attr("href") }
-                val text = a.text().trim()
+                val linkText = a.text().trim()
 
                 when {
                     href.startsWith("magnet:") -> {
                         if (magnet == null) magnet = href
+                        magnetIndex += 1
+                        var name = linkText.ifBlank { "Part $magnetIndex" }
+                        if (name.length > 48) name = "Part $magnetIndex"
+                        if (name.equals("magnet", true) || name.startsWith("magnet:")) {
+                            name = "Part $magnetIndex"
+                        }
+                        // Prefer labels like "Part 1", "Magnet", "Download"
+                        if (magnets.none { it.url == href }) {
+                            magnets.add(MirrorLink(name = name, url = href))
+                        }
                     }
                     isMirror(href) -> {
                         if (mirrors.none { it.url == href }) {
-                            var name = text.ifBlank { domainName(href) }
+                            var name = linkText.ifBlank { domainName(href) }
                             if (name.lowercase().contains("filehoster:")) {
                                 name = name.substringAfter(":").trim()
                             } else if (name.lowercase().contains("torrent file only")) {
@@ -168,6 +180,7 @@ object FitGirlApi {
                 description = description,
                 magnet = magnet,
                 infoHash = infoHash,
+                magnets = magnets,
                 mirrors = mirrors
             )
         } catch (e: Exception) {
@@ -247,8 +260,17 @@ data class FitGirlDetail(
     val description: String = "",
     val magnet: String? = null,
     val infoHash: String? = null,
+    val magnets: List<MirrorLink> = emptyList(),
     val mirrors: List<MirrorLink> = emptyList()
 ) {
+    /** All torrent/magnet parts for direct open (Part 1, Part 2, Full, ...). */
+    val torrentParts: List<MirrorLink>
+        get() = when {
+            magnets.isNotEmpty() -> magnets
+            !magnet.isNullOrBlank() -> listOf(MirrorLink("Full Game (Torrent)", magnet!!))
+            else -> emptyList()
+        }
+
     fun toGameDetail(): GameDetail {
         return GameDetail(
             id = id,
@@ -260,7 +282,7 @@ data class FitGirlDetail(
             price = "Repack",
             url = url,
             releaseDate = "",
-            reviews = if (magnet != null) "Magnet available" else "",
+            reviews = if (magnet != null || magnets.isNotEmpty()) "Magnet available" else "",
             genres = listOf("Repack"),
             screenshots = emptyList()
         )

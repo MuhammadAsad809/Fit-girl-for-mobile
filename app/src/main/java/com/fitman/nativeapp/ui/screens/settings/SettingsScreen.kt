@@ -232,33 +232,29 @@ fun SettingsScreen(
                 SectionHeader("CACHE & DISK STORAGE")
                 Spacer(Modifier.height(8.dp))
                 LiquidGlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                            Text(
-                                text = "Artwork Disk Cache",
-                                color = FitmanColors.TextPrimary,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "Free space by removing locally cached Steam artwork.",
-                                color = FitmanColors.TextSecondary,
-                                fontSize = 12.sp
-                            )
-                        }
-
+                        Text(
+                            text = "Artwork Disk Cache",
+                            color = FitmanColors.TextPrimary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Free space by removing locally cached Steam artwork.",
+                            color = FitmanColors.TextSecondary,
+                            fontSize = 12.sp
+                        )
                         LiquidGlassButton(
-                            text = "PURGE",
+                            text = "PURGE CACHE",
                             onClick = { showClearDialog = true },
                             isPrimary = false,
-                            leadingIcon = Icons.Default.CleaningServices
+                            leadingIcon = Icons.Default.CleaningServices,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
