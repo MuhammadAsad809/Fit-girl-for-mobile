@@ -285,10 +285,8 @@ fun GameDetailScreen(
                     )
                 } else if (repack != null) {
                     val r = repack
-                    val magnets = r.torrentParts
-                    val mainMagnet = r.magnet ?: magnets.firstOrNull()?.url
+                    val mainMagnet = r.magnet ?: r.torrentParts.firstOrNull()?.url
 
-                    // Always offer full game torrent when we have a magnet
                     if (!mainMagnet.isNullOrBlank()) {
                         LiquidGlassButton(
                             text = "FULL GAME DOWNLOAD (TORRENT)",
@@ -297,51 +295,7 @@ fun GameDetailScreen(
                             trailingIcon = Icons.Default.Download,
                             modifier = Modifier.fillMaxWidth()
                         )
-                    }
-
-                    // Extra magnet parts only if more than one unique magnet with real part labels
-                    val extraParts = magnets.filter { link ->
-                        val n = link.name.lowercase()
-                        link.url != mainMagnet && (n.contains("part") || magnets.size > 1)
-                    }.distinctBy { it.url }
-                    if (extraParts.isNotEmpty()) {
-                        Text(
-                            text = "OTHER TORRENT PARTS",
-                            color = FitmanColors.TextSecondary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        extraParts.forEach { part ->
-                            LiquidGlassButton(
-                                text = "${part.name.uppercase()} (TORRENT)",
-                                onClick = { openUrl(part.url) },
-                                isPrimary = false,
-                                trailingIcon = Icons.Default.Download,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-
-                    // File host mirrors (optional secondary)
-                    if (r.mirrors.isNotEmpty()) {
-                        Text(
-                            text = "FILE HOST MIRRORS",
-                            color = FitmanColors.TextSecondary,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        r.mirrors.take(6).forEach { m ->
-                            LiquidGlassButton(
-                                text = m.name.ifBlank { "Mirror" },
-                                onClick = { openUrl(m.url) },
-                                isPrimary = false,
-                                trailingIcon = Icons.Default.Folder,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-
-                    if (mainMagnet.isNullOrBlank() && r.mirrors.isEmpty()) {
+                    } else {
                         LiquidGlassButton(
                             text = "OPEN FITGIRL PAGE",
                             onClick = { openUrl(r.url) },
