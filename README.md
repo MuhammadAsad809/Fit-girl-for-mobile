@@ -84,3 +84,20 @@ com.fitman.nativeapp/
 - Built with **Kotlin 2.0.21**, **Android Gradle Plugin 8.7.3**, and **Jetpack Compose 2024.12.01 BOM**.
 - Minimum SDK: 23 (Android 6.0+) | Target SDK: 35 (Android 15+).
 - GitHub Actions CI/CD automatically compiles, packages, and releases `Fitman-v2.0-LiquidGlass.apk` on every push to `main`.
+
+
+---
+
+## FitGirl scraper
+
+`com.fitman.nativeapp.data.remote.FitGirlApi` scrapes [fitgirl-repacks.site](https://fitgirl-repacks.site):
+
+| Method | Description |
+|--------|-------------|
+| `search(query)` | Search by game name |
+| `latest()` | Homepage latest repacks |
+| `topOfMonth()` | Top 50 of the month |
+| `topOfYear()` | Top 150 of the year |
+| `detail(url)` | Magnet, mirrors (Pixeldrain, Gofile, Qiwi…), cover, description |
+
+Returns `Game` / `FitGirlDetail` compatible with existing UI models. Uses Jsoup (already in dependencies).
