@@ -142,14 +142,21 @@ object FitGirlApi {
                 when {
                     href.startsWith("magnet:") -> {
                         if (magnet == null) magnet = href
-                        magnetIndex += 1
-                        var name = linkText.ifBlank { "Part $magnetIndex" }
-                        if (name.length > 48) name = "Part $magnetIndex"
-                        if (name.equals("magnet", true) || name.startsWith("magnet:")) {
-                            name = "Part $magnetIndex"
-                        }
-                        // Prefer labels like "Part 1", "Magnet", "Download"
-                        if (magnets.none { it.url == href }) {
+                        // Deduplicate same magnet hash
+                        if (magnets.any { it.url == href }) {
+                            // skip duplicate
+                        } else {
+                            magnetIndex += 1
+                            val lower = linkText.lowercase()
+                            val name = when {
+                                lower.contains("part 1") || lower.contains("part1") -> "Part 1"
+                                lower.contains("part 2") || lower.contains("part2") -> "Part 2"
+                                lower.contains("part 3") || lower.contains("part3") -> "Part 3"
+                                lower.contains("part 4") || lower.contains("part4") -> "Part 4"
+                                lower.contains("part") -> linkText.take(40).ifBlank { "Part $magnetIndex" }
+                                magnetIndex == 1 -> "Full Game"
+                                else -> "Magnet $magnetIndex"
+                            }
                             magnets.add(MirrorLink(name = name, url = href))
                         }
                     }
@@ -263,11 +270,11 @@ data class FitGirlDetail(
     val magnets: List<MirrorLink> = emptyList(),
     val mirrors: List<MirrorLink> = emptyList()
 ) {
-    /** All torrent/magnet parts for direct open (Part 1, Part 2, Full, ...). */
+    /** Unique magnet links for torrent client. */
     val torrentParts: List<MirrorLink>
         get() = when {
-            magnets.isNotEmpty() -> magnets
-            !magnet.isNullOrBlank() -> listOf(MirrorLink("Full Game (Torrent)", magnet!!))
+            magnets.isNotEmpty() -> magnets.distinctBy { it.url }
+            !magnet.isNullOrBlank() -> listOf(MirrorLink("Full Game", magnet!!))
             else -> emptyList()
         }
 
