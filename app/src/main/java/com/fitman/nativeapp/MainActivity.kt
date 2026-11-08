@@ -3,6 +3,7 @@ package com.fitman.nativeapp
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -38,14 +39,16 @@ import com.fitman.nativeapp.data.remote.FitGirlDetail
 import com.fitman.nativeapp.data.remote.SteamApi
 import com.fitman.nativeapp.data.repository.FavoritesRepository
 import com.fitman.nativeapp.data.repository.SettingsRepository
+import com.fitman.nativeapp.ui.components.GameHubNavigationBar
 import com.fitman.nativeapp.ui.components.LiquidGlassLoadingIndicator
-import com.fitman.nativeapp.ui.components.LiquidGlassNavigationBar
 import com.fitman.nativeapp.ui.navigation.NavDestination
+import com.fitman.nativeapp.ui.screens.community.CommunityScreen
 import com.fitman.nativeapp.ui.screens.details.GameDetailScreen
-import com.fitman.nativeapp.ui.screens.discover.DiscoverScreen
+import com.fitman.nativeapp.ui.screens.home.HomeScreen
 import com.fitman.nativeapp.ui.screens.library.LibraryScreen
+import com.fitman.nativeapp.ui.screens.profile.ProfileScreen
+import com.fitman.nativeapp.ui.screens.ranking.RankingScreen
 import com.fitman.nativeapp.ui.screens.search.SearchScreen
-import com.fitman.nativeapp.ui.screens.settings.SettingsScreen
 import com.fitman.nativeapp.ui.theme.FitmanColors
 import com.fitman.nativeapp.ui.theme.FitmanTheme
 import kotlinx.coroutines.Dispatchers
@@ -79,12 +82,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
     val favoritesRepo = remember { FavoritesRepository(context) }
     val settingsRepo = remember { SettingsRepository(context) }
 
-    var currentDestination by remember { mutableStateOf<NavDestination>(NavDestination.Discover) }
+    var currentDestination by remember { mutableStateOf<NavDestination>(NavDestination.Home) }
     var selectedCategory by remember { mutableStateOf("top_sellers") }
-    // "steam" | "fitgirl"
     var catalogSource by remember { mutableStateOf("steam") }
 
-    // Discover State
+    // Discover & Home State
     var discoverGames by remember { mutableStateOf<List<Game>>(emptyList()) }
     var discoverLoading by remember { mutableStateOf(false) }
     var discoverError by remember { mutableStateOf("") }
@@ -109,12 +111,12 @@ fun FitmanApp(openUrl: (String) -> Unit) {
     var favoritesList by remember { mutableStateOf(favoritesRepo.getFavorites()) }
 
     // Handle back button
-    BackHandler(enabled = selectedGame != null || currentDestination != NavDestination.Discover) {
+    BackHandler(enabled = selectedGame != null || currentDestination != NavDestination.Home) {
         if (selectedGame != null) {
             selectedGame = null
             gameDetail = null
-        } else if (currentDestination != NavDestination.Discover) {
-            currentDestination = NavDestination.Discover
+        } else if (currentDestination != NavDestination.Home) {
+            currentDestination = NavDestination.Home
         }
     }
 
@@ -228,10 +230,10 @@ fun FitmanApp(openUrl: (String) -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = FitmanColors.MainBackground,
+        containerColor = FitmanColors.WarmBackground,
         bottomBar = {
-            if (selectedGame == null) {
-                LiquidGlassNavigationBar(
+            if (selectedGame == null && currentDestination != NavDestination.Search) {
+                GameHubNavigationBar(
                     currentDestination = currentDestination,
                     onNavigate = { dest -> currentDestination = dest }
                 )
@@ -242,7 +244,7 @@ fun FitmanApp(openUrl: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(FitmanColors.MainBackground)
+                .background(FitmanColors.WarmBackgroundGradient)
         ) {
             if (selectedGame != null) {
                 // Game Details View
@@ -285,7 +287,7 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                     }
                 }
             } else {
-                // Tab Content
+                // Main Tab Content
                 AnimatedContent(
                     targetState = currentDestination,
                     transitionSpec = {
@@ -295,23 +297,56 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                     label = "tabTransition"
                 ) { destination ->
                     when (destination) {
-                        NavDestination.Discover -> {
-                            DiscoverScreen(
+                        NavDestination.Home -> {
+                            HomeScreen(
                                 games = discoverGames,
-                                selectedCategory = selectedCategory,
-                                catalogSource = catalogSource,
-                                onCatalogSourceChange = { src ->
-                                    catalogSource = src
-                                    loadDiscover(selectedCategory)
-                                },
-                                onCategorySelected = { key -> loadDiscover(key) },
                                 onGameClick = { game -> openGameDetails(game) },
-                                onRefresh = { loadDiscover(selectedCategory) },
-                                onQuickSearchClick = { currentDestination = NavDestination.Search },
-                                isLoading = discoverLoading,
-                                errorMessage = discoverError,
-                                currentPage = discoverPage,
-                                onPageChange = { discoverPage = it }
+                                onSearchClick = { currentDestination = NavDestination.Search },
+                                onNotificationClick = {
+                                    Toast.makeText(context, "No new notifications", Toast.LENGTH_SHORT).show()
+                                },
+                                onScanClick = {
+                                    Toast.makeText(context, "GameHub QR Scanner ready", Toast.LENGTH_SHORT).show()
+                                },
+                                isLoading = discoverLoading
+                            )
+                        }
+
+                        NavDestination.Community -> {
+                            CommunityScreen(
+                                onSearchClick = { currentDestination = NavDestination.Search }
+                            )
+                        }
+
+                        NavDestination.Ranking -> {
+                            RankingScreen(
+                                games = discoverGames,
+                                onGameClick = { game -> openGameDetails(game) },
+                                onBackClick = { currentDestination = NavDestination.Home },
+                                onSearchClick = { currentDestination = NavDestination.Search }
+                            )
+                        }
+
+                        NavDestination.Library -> {
+                            LibraryScreen(
+                                favorites = favoritesList,
+                                onGameClick = { game -> openGameDetails(game) },
+                                onStatusChange = { game, newStatus ->
+                                    favoritesRepo.setGameStatus(game, newStatus)
+                                    favoritesList = favoritesRepo.getFavorites()
+                                },
+                                onRemoveFavorite = { game ->
+                                    favoritesRepo.removeFavorite(game.id)
+                                    favoritesList = favoritesRepo.getFavorites()
+                                },
+                                onExploreClick = { currentDestination = NavDestination.Home }
+                            )
+                        }
+
+                        NavDestination.Profile -> {
+                            ProfileScreen(
+                                settingsRepository = settingsRepo,
+                                libraryCount = favoritesList.size
                             )
                         }
 
@@ -339,26 +374,6 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                                 errorMessage = searchError,
                                 onGameClick = { game -> openGameDetails(game) }
                             )
-                        }
-
-                        NavDestination.Library -> {
-                            LibraryScreen(
-                                favorites = favoritesList,
-                                onGameClick = { game -> openGameDetails(game) },
-                                onStatusChange = { game, newStatus ->
-                                    favoritesRepo.setGameStatus(game, newStatus)
-                                    favoritesList = favoritesRepo.getFavorites()
-                                },
-                                onRemoveFavorite = { game ->
-                                    favoritesRepo.removeFavorite(game.id)
-                                    favoritesList = favoritesRepo.getFavorites()
-                                },
-                                onExploreClick = { currentDestination = NavDestination.Discover }
-                            )
-                        }
-
-                        NavDestination.Settings -> {
-                            SettingsScreen(settingsRepository = settingsRepo)
                         }
                     }
                 }

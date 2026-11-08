@@ -72,7 +72,7 @@ fun SearchScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(FitmanColors.MainBackground)
+            .background(FitmanColors.WarmBackgroundGradient)
             .padding(horizontal = 20.dp)
     ) {
         Spacer(Modifier.height(16.dp))

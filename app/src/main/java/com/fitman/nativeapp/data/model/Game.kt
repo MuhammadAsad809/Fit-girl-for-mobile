@@ -20,7 +20,10 @@ data class Game(
     val url: String = "https://store.steampowered.com/app/$id/",
     val tag: String = "",
     val discountPercent: Int = 0,
-    val libraryStatus: LibraryStatus = LibraryStatus.FAVORITE
+    val libraryStatus: LibraryStatus = LibraryStatus.FAVORITE,
+    val rating: Float = 9.2f,
+    val genre: String = "Action • Adventure",
+    val quote: String = "Play in Ultra-Realistic graphics with full controller support"
 ) {
     val displayPrice: String
         get() = when {
@@ -28,6 +31,9 @@ data class Game(
             price.equals("Free", ignoreCase = true) -> "Free to Play"
             else -> price
         }
+
+    val displayRating: String
+        get() = String.format(java.util.Locale.US, "%.1f", rating)
 }
 
 data class Screenshot(

@@ -1,8 +1,17 @@
 package com.fitman.nativeapp.ui.navigation
 
 sealed class NavDestination(val route: String, val title: String) {
-    object Discover : NavDestination("discover", "Discover")
-    object Search : NavDestination("search", "Search")
+    object Home : NavDestination("home", "Home")
+    object Community : NavDestination("community", "Community")
+    object Ranking : NavDestination("ranking", "Ranking")
     object Library : NavDestination("library", "Library")
-    object Settings : NavDestination("settings", "Settings")
+    object Profile : NavDestination("profile", "Profile")
+
+    // Sub-destination
+    object Search : NavDestination("search", "Search")
+
+    companion object {
+        val Discover = Home
+        val Settings = Profile
+    }
 }

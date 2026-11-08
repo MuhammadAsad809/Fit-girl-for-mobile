@@ -84,4 +84,24 @@ object FitmanColors {
     // Shimmer Skeleton Colors
     val ShimmerBase = Color(0x1A141A29)
     val ShimmerHighlight = Color(0x332E3B54)
+
+    // GameHub Warm Obsidian Theme Tokens (Matched to screenshots)
+    val WarmBackground = Color(0xFF0F0D0C)
+    val WarmBackgroundTop = Color(0xFF181411)
+    val WarmBackgroundBottom = Color(0xFF090807)
+    val WarmBackgroundGradient = Brush.verticalGradient(
+        listOf(Color(0xFF181411), Color(0xFF0F0D0C), Color(0xFF090807))
+    )
+    val WarmCardBackground = Color(0xFF221C17)
+    val WarmCardDark = Color(0xFF181410)
+    val WarmCardBorder = Color(0x336E5642)
+    val WarmCardGradient = Brush.verticalGradient(
+        listOf(Color(0xFF2A221C), Color(0xFF1D1814))
+    )
+    val WarmSearchPill = Color(0x662C241E)
+    val GoldRank = Color(0xFFC5A059)
+    val SilverRank = Color(0xFF7B818C)
+    val BronzeRank = Color(0xFFA56E47)
+    val StarGold = Color(0xFFE5B85A)
+    val TextMutedWarm = Color(0xFF8F8F94)
 }

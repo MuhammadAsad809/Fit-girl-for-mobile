@@ -35,39 +35,40 @@ jobs:
       - name: Copy & Rename APK
         run: |
           mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman-v2.3-GameHub.apk
           cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman-v2.2-LiquidGlass.apk
-          cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman-v2.0-LiquidGlass.apk
           cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman.apk
           cp app/build/outputs/apk/debug/app-debug.apk dist/app-debug.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Fitman-v2.2-LiquidGlass-APK
-          path: dist/Fitman-v2.2-LiquidGlass.apk
+          name: Fitman-v2.3-GameHub-APK
+          path: dist/Fitman-v2.3-GameHub.apk
           retention-days: 14
 
       - name: Release APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.2-${{ github.run_number }}
-          name: "Fitman Native v2.2 (Apple Liquid Glass) Build ${{ github.run_number }}"
+          tag_name: v2.3-${{ github.run_number }}
+          name: "Fitman Native v2.3 (GameHub UI Edition) Build ${{ github.run_number }}"
           body: |
-            ## Fitman Native v2.2 — Apple Liquid Glass Complete UI Redesign
+            ## Fitman Native v2.3 — GameHub & TapTap Full UI Overhaul
 
-            Ultra-premium Apple iOS 45-inspired Liquid Glass & Obsidian Glassmorphism experience.
-
+            Faithfully recreated and matched to user interface screenshots:
+            
             ### Highlights:
-            - **Unified Frosted Glass Segmented Capsule**: Floating pill navigation for Discover, Popular, New Releases, and Specials.
-            - **Liquid Glass Shimmer Skeleton**: High-frame-rate animated skeletal placeholders during catalog loading.
-            - **Cinematic Spotlight Hero Section**: Pulsing specular indicator dot, dynamic pricing pill, discount badges, and spring physics CTA.
-            - **Optical Glass Refraction**: Multi-layer obsidian gradients, soft inner sheen layers, and hairline specular highlights.
-            - **Tactile Touch Physics**: Fluid scale compression and spring returns across all interactive elements.
-            - **Expanded Details & Repack Engine**: 1080p screenshot carousel, Metacritic badges, platform pills, and clean full-torrent launcher.
+            - **GameHub Top Bar**: Capsule search pill ("FIFA 22") with notification bell and scanner icon buttons.
+            - **Category Underline Tabs**: Minimal white indicator pill underneath active subtabs (Recommended, PC Games, Retro Games).
+            - **Featured "Today" Hero Banner**: Dynamic date pill, cinematic video/artwork preview, quote subtitle with audio mute toggle, and dash carousel indicators.
+            - **Your Next Favorite**: Continuous squircle game cards in horizontal carousel.
+            - **News & Updates**: Banner carousels for GSFG 1.1 frame interpolation and updates.
+            - **5-Tab Dock**: Home, Community, Ranking, Library, Profile with high-contrast active icons.
+            - **Dedicated Ranking Screen**: Popular (Ranks 1 to 10 with Gold, Silver, Bronze badges) and Hot Games (with Star Ratings ★ 9.6 and Genres) side-by-side swipeable cards.
           files: |
+            dist/Fitman-v2.3-GameHub.apk
             dist/Fitman-v2.2-LiquidGlass.apk
-            dist/Fitman-v2.0-LiquidGlass.apk
             dist/Fitman.apk
             dist/app-debug.apk
         env:
