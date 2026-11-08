@@ -53,6 +53,8 @@ import com.fitman.nativeapp.ui.theme.FitmanColors
 fun DiscoverScreen(
     games: List<Game>,
     selectedCategory: String,
+    catalogSource: String = "steam",
+    onCatalogSourceChange: (String) -> Unit = {},
     onCategorySelected: (String) -> Unit,
     onGameClick: (Game) -> Unit,
     onRefresh: () -> Unit,
@@ -63,12 +65,20 @@ fun DiscoverScreen(
     onPageChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val categories = listOf(
-        "Discover" to "top_sellers",
-        "Popular" to "popular",
-        "New Releases" to "new",
-        "Specials" to "specials"
-    )
+    val categories = if (catalogSource == "fitgirl") {
+        listOf(
+            "Latest" to "new",
+            "Top Month" to "popular",
+            "Top Year" to "specials"
+        )
+    } else {
+        listOf(
+            "Discover" to "top_sellers",
+            "Popular" to "popular",
+            "New Releases" to "new",
+            "Specials" to "specials"
+        )
+    }
 
     val pageSize = 10
     val totalPages = ((games.size - 1).coerceAtLeast(0) / pageSize) + 1
@@ -136,6 +146,28 @@ fun DiscoverScreen(
             }
         }
 
+        // Catalog source: Steam / FitGirl
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            item {
+                LiquidGlassChip(
+                    label = "Steam",
+                    isSelected = catalogSource == "steam",
+                    onClick = { onCatalogSourceChange("steam") }
+                )
+            }
+            item {
+                LiquidGlassChip(
+                    label = "FitGirl",
+                    isSelected = catalogSource == "fitgirl",
+                    onClick = { onCatalogSourceChange("fitgirl") }
+                )
+            }
+        }
+
         // Horizontal Category Chips
         LazyRow(
             contentPadding = PaddingValues(horizontal = 20.dp),
@@ -164,7 +196,7 @@ fun DiscoverScreen(
                             LiquidGlassLoadingIndicator(size = 56.dp)
                             Spacer(Modifier.height(16.dp))
                             Text(
-                                text = "STREAMING STEAM DATA...",
+                                text = if (catalogSource == "fitgirl") "LOADING FITGIRL REPACKS..." else "STREAMING STEAM DATA...",
                                 color = FitmanColors.ElectricLime,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,

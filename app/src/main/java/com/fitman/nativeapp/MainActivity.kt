@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.fitman.nativeapp.data.model.Game
 import com.fitman.nativeapp.data.model.GameDetail
 import com.fitman.nativeapp.data.model.LibraryStatus
+import com.fitman.nativeapp.data.remote.FitGirlApi
 import com.fitman.nativeapp.data.remote.SteamApi
 import com.fitman.nativeapp.data.repository.FavoritesRepository
 import com.fitman.nativeapp.data.repository.SettingsRepository
@@ -79,6 +80,8 @@ fun FitmanApp(openUrl: (String) -> Unit) {
 
     var currentDestination by remember { mutableStateOf<NavDestination>(NavDestination.Discover) }
     var selectedCategory by remember { mutableStateOf("top_sellers") }
+    // "steam" | "fitgirl"
+    var catalogSource by remember { mutableStateOf("steam") }
 
     // Discover State
     var discoverGames by remember { mutableStateOf<List<Game>>(emptyList()) }
@@ -120,14 +123,27 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val list = withContext(Dispatchers.IO) {
-                    SteamApi.featured(categoryKey, settingsRepo.storeRegion)
+                    if (catalogSource == "fitgirl") {
+                        when (categoryKey) {
+                            "popular", "top_sellers" -> FitGirlApi.topOfMonth()
+                            "new", "new_releases" -> FitGirlApi.latest()
+                            "specials" -> FitGirlApi.topOfYear()
+                            else -> FitGirlApi.latest()
+                        }
+                    } else {
+                        SteamApi.featured(categoryKey, settingsRepo.storeRegion)
+                    }
                 }
                 discoverGames = list
                 if (list.isEmpty()) {
-                    discoverError = "No games found in this category."
+                    discoverError = if (catalogSource == "fitgirl") {
+                        "No FitGirl repacks found."
+                    } else {
+                        "No games found in this category."
+                    }
                 }
             } catch (e: Exception) {
-                discoverError = e.message ?: "Failed to retrieve Steam catalogue."
+                discoverError = e.message ?: "Failed to load catalogue."
             } finally {
                 discoverLoading = false
             }
@@ -146,7 +162,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val list = withContext(Dispatchers.IO) {
-                    SteamApi.search(q, settingsRepo.storeRegion)
+                    if (catalogSource == "fitgirl") {
+                        FitGirlApi.search(q)
+                    } else {
+                        SteamApi.search(q, settingsRepo.storeRegion)
+                    }
                 }
                 searchResults = list
                 if (list.isEmpty()) {
@@ -168,18 +188,38 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val detail = withContext(Dispatchers.IO) {
-                    SteamApi.details(game.id, settingsRepo.storeRegion)
+                    if (catalogSource == "fitgirl" || game.tag.contains("FitGirl", true) ||
+                        game.tag.contains("Latest", true) || game.tag.contains("Top", true) ||
+                        game.url.contains("fitgirl-repacks.site")
+                    ) {
+                        FitGirlApi.detail(game.url)?.toGameDetail()
+                            ?: GameDetail(
+                                id = game.id,
+                                title = game.title,
+                                image = game.image,
+                                description = "FitGirl repack. Open page for magnet and mirrors.",
+                                developer = "FitGirl",
+                                publisher = "FitGirl Repacks",
+                                price = game.price,
+                                url = game.url
+                            )
+                    } else {
+                        SteamApi.details(game.id, settingsRepo.storeRegion)
+                    }
                 }
                 gameDetail = detail
             } catch (e: Exception) {
-                // Fallback to basic game details if full info fails
                 gameDetail = GameDetail(
                     id = game.id,
                     title = game.title,
                     image = game.image,
-                    description = "View complete media and details on the official Steam Store.",
-                    developer = "Steam Partner",
-                    publisher = "Steam",
+                    description = if (catalogSource == "fitgirl") {
+                        "Open the FitGirl page for magnet links and mirrors."
+                    } else {
+                        "View complete media and details on the official Steam Store."
+                    },
+                    developer = if (catalogSource == "fitgirl") "FitGirl" else "Steam Partner",
+                    publisher = if (catalogSource == "fitgirl") "FitGirl Repacks" else "Steam",
                     price = game.price,
                     url = game.url
                 )
@@ -263,6 +303,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                             DiscoverScreen(
                                 games = discoverGames,
                                 selectedCategory = selectedCategory,
+                                catalogSource = catalogSource,
+                                onCatalogSourceChange = { src ->
+                                    catalogSource = src
+                                    loadDiscover(selectedCategory)
+                                },
                                 onCategorySelected = { key -> loadDiscover(key) },
                                 onGameClick = { game -> openGameDetails(game) },
                                 onRefresh = { loadDiscover(selectedCategory) },
@@ -279,6 +324,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                                 query = searchQuery,
                                 onQueryChange = { searchQuery = it },
                                 onSearch = { q -> performSearch(q) },
+                                catalogSource = catalogSource,
+                                onCatalogSourceChange = { src ->
+                                    catalogSource = src
+                                    if (searchQuery.isNotBlank()) performSearch(searchQuery)
+                                },
                                 searchResults = searchResults,
                                 recentSearches = recentSearches,
                                 onRecentSearchClick = { term ->

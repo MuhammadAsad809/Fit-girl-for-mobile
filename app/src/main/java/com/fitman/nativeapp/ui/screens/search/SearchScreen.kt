@@ -38,6 +38,7 @@ import com.fitman.nativeapp.data.model.Game
 import com.fitman.nativeapp.ui.components.LiquidGlassButton
 import com.fitman.nativeapp.ui.components.LiquidGlassCard
 import com.fitman.nativeapp.ui.components.LiquidGlassLoadingIndicator
+import com.fitman.nativeapp.ui.components.LiquidGlassChip
 import com.fitman.nativeapp.ui.components.LiquidGlassSearchBar
 import com.fitman.nativeapp.ui.screens.discover.GameItemCard
 import com.fitman.nativeapp.ui.theme.FitmanColors
@@ -48,6 +49,8 @@ fun SearchScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
+    catalogSource: String = "steam",
+    onCatalogSourceChange: (String) -> Unit = {},
     searchResults: List<Game>,
     recentSearches: List<String>,
     onRecentSearchClick: (String) -> Unit,
@@ -89,7 +92,7 @@ fun SearchScreen(
                     letterSpacing = 2.sp
                 )
                 Text(
-                    text = "Steam Global Catalogue Query",
+                    text = if (catalogSource == "fitgirl") "FitGirl Repacks Search" else "Steam Global Catalogue Query",
                     color = FitmanColors.TextSecondary,
                     fontSize = 12.sp
                 )
@@ -109,8 +112,27 @@ fun SearchScreen(
             query = query,
             onQueryChange = onQueryChange,
             onSearch = onSearch,
-            placeholderText = "Enter title, franchise, or genre..."
+            placeholderText = if (catalogSource == "fitgirl") {
+                "Search FitGirl repacks..."
+            } else {
+                "Enter title, franchise, or genre..."
+            }
         )
+
+        Spacer(Modifier.height(10.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            LiquidGlassChip(
+                label = "Steam",
+                isSelected = catalogSource == "steam",
+                onClick = { onCatalogSourceChange("steam") }
+            )
+            LiquidGlassChip(
+                label = "FitGirl",
+                isSelected = catalogSource == "fitgirl",
+                onClick = { onCatalogSourceChange("fitgirl") }
+            )
+        }
 
         Spacer(Modifier.height(14.dp))
 
