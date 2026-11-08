@@ -44,8 +44,8 @@ fun LiquidGlassCard(
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && onClick != null) 0.97f else 1.0f,
-        animationSpec = spring(dampingRatio = 0.75f, stiffness = 400f),
+        targetValue = if (isPressed && onClick != null) 0.975f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.72f, stiffness = 450f),
         label = "glassCardScale"
     )
 
@@ -54,8 +54,8 @@ fun LiquidGlassCard(
         .shadow(
             elevation = elevation,
             shape = shape,
-            ambientColor = Color.Black.copy(alpha = 0.6f),
-            spotColor = Color.Black.copy(alpha = 0.8f)
+            ambientColor = Color.Black.copy(alpha = 0.65f),
+            spotColor = Color.Black.copy(alpha = 0.85f)
         )
         .clip(shape)
         .background(brush = backgroundBrush)
@@ -77,6 +77,14 @@ fun LiquidGlassCard(
     }
 
     Box(modifier = cardModifier) {
+        // Soft optical inner sheen (subtle refraction depth)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp)
+                .background(FitmanColors.GlassInnerSheen)
+        )
+
         // Specular top edge glint (iOS 45 liquid glass refraction simulation)
         if (showTopHighlight) {
             Box(
@@ -87,9 +95,9 @@ fun LiquidGlassCard(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                FitmanColors.GlassBorderHighlight,
+                                FitmanColors.GlassBorderHighlight.copy(alpha = 0.3f),
                                 FitmanColors.SpecularGlint,
-                                FitmanColors.GlassBorderHighlight,
+                                FitmanColors.GlassBorderHighlight.copy(alpha = 0.3f),
                                 Color.Transparent
                             )
                         )

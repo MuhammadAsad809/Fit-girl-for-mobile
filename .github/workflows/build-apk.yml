@@ -35,47 +35,40 @@ jobs:
       - name: Copy & Rename APK
         run: |
           mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman-v2.2-LiquidGlass.apk
           cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman-v2.0-LiquidGlass.apk
+          cp app/build/outputs/apk/debug/app-debug.apk dist/Fitman.apk
           cp app/build/outputs/apk/debug/app-debug.apk dist/app-debug.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Fitman-v2.0-LiquidGlass-APK
-          path: dist/Fitman-v2.0-LiquidGlass.apk
+          name: Fitman-v2.2-LiquidGlass-APK
+          path: dist/Fitman-v2.2-LiquidGlass.apk
           retention-days: 14
 
       - name: Release APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.1-${{ github.run_number }}
-          name: "Fitman Native v2.1 Build ${{ github.run_number }}"
+          tag_name: v2.2-${{ github.run_number }}
+          name: "Fitman Native v2.2 (Apple Liquid Glass) Build ${{ github.run_number }}"
           body: |
-            ## Fitman Native v2.1 — Expanded Gaming Catalogue & Screenshots
-            
-            Enhanced edition featuring Metacritic integration, 1080p screenshot gallery lightbox, platform pills, and categorized library playlists.
-            
+            ## Fitman Native v2.2 — Apple Liquid Glass Complete UI Redesign
+
+            Ultra-premium Apple iOS 45-inspired Liquid Glass & Obsidian Glassmorphism experience.
+
             ### Highlights:
-            - **Metacritic Score Integration**: Live Metacritic rating badge with direct score reviews.
-            - **1080p Screenshot Gallery**: Horizontal interactive thumbnail carousel with full-screen lightbox modal.
-            - **Platform & Controller Support**: Windows PC, macOS, Steam Deck / Linux, and Gamepad badges.
-            - **Categorized Library**: Playlist organizing by Wishlist, Currently Playing, Completed, and Favorites.
-            - **Hardware Specs**: Expandable minimum & recommended PC hardware requirements.
-            - **Liquid Glass Design System**: Deep obsidian glass, specular edge highlights, and electric lime accents.
-            
-            Futuristic iOS 45-inspired Obsidian Black Glassmorphism Game Discovery App for Android.
-            
-            ### Highlights:
-            - **Liquid Glass Design System**: Deep obsidian translucent glass surfaces, specular edge highlights, subtle electric lime (#B7FF6A) accents.
-            - **Game Discovery Dashboard**: Cinematic Hero spotlight, categories (Discover, Top Sellers, New Releases, Specials), floating price tags.
-            - **Futuristic Glass Search**: Instant real-time Steam catalog search, recent queries memory, dynamic empty & error states.
-            - **Cinematic Game Details**: High-res backdrop artwork, rich metadata panels, verified direct Steam Store launcher.
-            - **Functional Library**: Offline favorite games bookmarking with instant toggle and quick access.
-            - **Settings Suite**: Specular highlights toggle, Glass blur engine controls, cache management, and regional currency selector.
-            - **Ultra-Polished Micro-Interactions**: Spring-based physics transitions, scale feedback, and continuous corner squircles.
+            - **Unified Frosted Glass Segmented Capsule**: Floating pill navigation for Discover, Popular, New Releases, and Specials.
+            - **Liquid Glass Shimmer Skeleton**: High-frame-rate animated skeletal placeholders during catalog loading.
+            - **Cinematic Spotlight Hero Section**: Pulsing specular indicator dot, dynamic pricing pill, discount badges, and spring physics CTA.
+            - **Optical Glass Refraction**: Multi-layer obsidian gradients, soft inner sheen layers, and hairline specular highlights.
+            - **Tactile Touch Physics**: Fluid scale compression and spring returns across all interactive elements.
+            - **Expanded Details & Repack Engine**: 1080p screenshot carousel, Metacritic badges, platform pills, and clean full-torrent launcher.
           files: |
+            dist/Fitman-v2.2-LiquidGlass.apk
             dist/Fitman-v2.0-LiquidGlass.apk
+            dist/Fitman.apk
             dist/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

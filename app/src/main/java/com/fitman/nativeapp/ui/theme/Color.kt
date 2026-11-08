@@ -43,17 +43,34 @@ object FitmanColors {
 
     val GlassCardGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xA6182030),
-            Color(0x8C090D15)
+            Color(0xD9161F30),
+            Color(0xB30B0F19),
+            Color(0xCC06080E)
+        )
+    )
+
+    val GlassInnerSheen = Brush.verticalGradient(
+        colors = listOf(
+            Color(0x24FFFFFF),
+            Color(0x08FFFFFF),
+            Color.Transparent
+        )
+    )
+
+    val GlassCapsuleGradient = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xD9101624),
+            Color(0xB8090C14),
+            Color(0xD9101624)
         )
     )
 
     val SpecularBorderBrush = Brush.linearGradient(
         colors = listOf(
-            Color(0x38FFFFFF),
-            Color(0x0AFFFFFF),
-            Color(0x05FFFFFF),
-            Color(0x1FFFFFFF)
+            Color(0x40FFFFFF),
+            Color(0x0DFFFFFF),
+            Color(0x08FFFFFF),
+            Color(0x26FFFFFF)
         )
     )
 
@@ -63,4 +80,8 @@ object FitmanColors {
             Color(0xFF9BEB4A)
         )
     )
+
+    // Shimmer Skeleton Colors
+    val ShimmerBase = Color(0x1A141A29)
+    val ShimmerHighlight = Color(0x332E3B54)
 }
