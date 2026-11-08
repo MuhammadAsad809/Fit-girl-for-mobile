@@ -56,7 +56,8 @@ fun GameHubNavigationBar(
                 width = 1.dp,
                 brush = Brush.verticalGradient(
                     listOf(Color(0x2EFFFFFF), Color(0x05FFFFFF))
-                )
+                ),
+                shape = RoundedCornerShape(0.dp)
             )
             .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {

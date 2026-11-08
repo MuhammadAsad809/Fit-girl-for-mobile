@@ -113,6 +113,7 @@ fun LiquidGlassNavigationBar(
                     NavDestination.Search -> Icons.Default.Search
                     NavDestination.Library -> Icons.Default.Bookmarks
                     NavDestination.Settings -> Icons.Default.Settings
+                    else -> Icons.Default.Explore
                 }
 
                 LiquidNavBarItem(

@@ -94,7 +94,7 @@ fun GameHubTopBar(
                     onClick = onSearchClick
                 )
                 .padding(horizontal = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.CenterStart
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
