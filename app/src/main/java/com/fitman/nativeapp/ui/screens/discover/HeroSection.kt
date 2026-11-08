@@ -140,7 +140,7 @@ fun HeroSection(
                                     .padding(horizontal = 8.dp, vertical = 3.dp)
                             ) {
                                 Text(
-                                    text = game.displayPrice,
+                                    text = "DOWNLOAD",
                                     color = FitmanColors.ElectricLime,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold

@@ -275,7 +275,7 @@ private fun CategorizedLibraryCard(
                                 .padding(horizontal = 8.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = game.displayPrice,
+                                text = "",
                                 color = FitmanColors.ElectricLime,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold

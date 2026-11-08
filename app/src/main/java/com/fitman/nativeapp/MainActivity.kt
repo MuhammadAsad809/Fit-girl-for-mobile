@@ -127,24 +127,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val list = withContext(Dispatchers.IO) {
-                    if (catalogSource == "fitgirl") {
-                        when (categoryKey) {
-                            "popular", "top_sellers" -> FitGirlApi.topOfMonth()
-                            "new", "new_releases" -> FitGirlApi.latest()
-                            "specials" -> FitGirlApi.topOfYear()
-                            else -> FitGirlApi.latest()
-                        }
-                    } else {
-                        SteamApi.featured(categoryKey, settingsRepo.storeRegion)
-                    }
+                    SteamApi.featured(categoryKey, settingsRepo.storeRegion)
                 }
                 discoverGames = list
                 if (list.isEmpty()) {
-                    discoverError = if (catalogSource == "fitgirl") {
-                        "No FitGirl repacks found."
-                    } else {
-                        "No games found in this category."
-                    }
+                    discoverError = "No games found in this category."
                 }
             } catch (e: Exception) {
                 discoverError = e.message ?: "Failed to load catalogue."
@@ -166,11 +153,7 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val list = withContext(Dispatchers.IO) {
-                    if (catalogSource == "fitgirl") {
-                        FitGirlApi.search(q)
-                    } else {
-                        SteamApi.search(q, settingsRepo.storeRegion)
-                    }
+                    SteamApi.search(q, settingsRepo.storeRegion)
                 }
                 searchResults = list
                 if (list.isEmpty()) {
@@ -195,24 +178,7 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         scope.launch {
             try {
                 val detail = withContext(Dispatchers.IO) {
-                    if (catalogSource == "fitgirl" || game.tag.contains("FitGirl", true) ||
-                        game.tag.contains("Latest", true) || game.tag.contains("Top", true) ||
-                        game.url.contains("fitgirl-repacks.site")
-                    ) {
-                        FitGirlApi.detail(game.url)?.toGameDetail()
-                            ?: GameDetail(
-                                id = game.id,
-                                title = game.title,
-                                image = game.image,
-                                description = "FitGirl repack. Open page for magnet and mirrors.",
-                                developer = "FitGirl",
-                                publisher = "FitGirl Repacks",
-                                price = game.price,
-                                url = game.url
-                            )
-                    } else {
-                        SteamApi.details(game.id, settingsRepo.storeRegion)
-                    }
+                    SteamApi.details(game.id, settingsRepo.storeRegion)
                 }
                 gameDetail = detail
             } catch (e: Exception) {
@@ -220,13 +186,9 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                     id = game.id,
                     title = game.title,
                     image = game.image,
-                    description = if (catalogSource == "fitgirl") {
-                        "Open the FitGirl page for magnet links and mirrors."
-                    } else {
-                        "View complete media and details on the official Steam Store."
-                    },
-                    developer = if (catalogSource == "fitgirl") "FitGirl" else "Steam Partner",
-                    publisher = if (catalogSource == "fitgirl") "FitGirl Repacks" else "Steam",
+                    description = "View complete media and details on the official Steam Store.",
+                    developer = "Steam Partner",
+                    publisher = "Steam",
                     price = game.price,
                     url = game.url
                 )

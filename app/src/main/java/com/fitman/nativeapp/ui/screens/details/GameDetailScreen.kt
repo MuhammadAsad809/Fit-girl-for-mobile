@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.OpenInNew
@@ -266,84 +267,72 @@ fun GameDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 LiquidGlassButton(
-                    text = "OPEN OFFICIAL STEAM STORE",
+                    text = "OPEN IN STEAM",
                     onClick = { openUrl(game.url) },
                     isPrimary = true,
                     trailingIcon = Icons.Default.OpenInNew,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                LiquidGlassButton(
-                    text = if (repackLoading) "SEARCHING FITGIRL..." else "GET REPACK DOWNLOAD",
-                    onClick = { if (!repackLoading) onGetRepack() },
-                    isPrimary = false,
-                    trailingIcon = Icons.Default.Download,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                if (repackError.isNotBlank()) {
-                    Text(
-                        text = repackError,
-                        color = Color(0xFFFF8A80),
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-
-                repack?.let { r ->
-                    LiquidGlassCard(
+                // Download options (FitGirl scraper → torrent / mirrors)
+                if (repackLoading) {
+                    LiquidGlassButton(
+                        text = "SEARCHING TORRENT...",
+                        onClick = { },
+                        isPrimary = false,
+                        trailingIcon = Icons.Default.Download,
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(
-                                text = "FITGIRL REPACK",
-                                color = FitmanColors.ElectricLime,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
-                            Text(
-                                text = r.title,
-                                color = FitmanColors.TextPrimary,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            if (!r.magnet.isNullOrBlank()) {
-                                LiquidGlassButton(
-                                    text = "OPEN MAGNET LINK",
-                                    onClick = { openUrl(r.magnet!!) },
-                                    isPrimary = true,
-                                    trailingIcon = Icons.Default.Link,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            if (r.mirrors.isNotEmpty()) {
-                                Text(
-                                    text = "MIRRORS",
-                                    color = FitmanColors.TextSecondary,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                r.mirrors.forEach { m: MirrorLink ->
-                                    LiquidGlassButton(
-                                        text = m.name.ifBlank { "Mirror" },
-                                        onClick = { openUrl(m.url) },
-                                        isPrimary = false,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            }
-                            LiquidGlassButton(
-                                text = "OPEN FITGIRL PAGE",
-                                onClick = { openUrl(r.url) },
-                                isPrimary = false,
-                                trailingIcon = Icons.Default.OpenInNew,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                    )
+                } else if (repack != null) {
+                    val r = repack
+                    // Full game via magnet/torrent
+                    if (!r.magnet.isNullOrBlank()) {
+                        LiquidGlassButton(
+                            text = "FULL GAME DOWNLOAD (TORRENT)",
+                            onClick = { openUrl(r.magnet!!) },
+                            isPrimary = true,
+                            trailingIcon = Icons.Default.Download,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    // Part / selective file mirrors
+                    val partMirrors = r.mirrors
+                    if (partMirrors.isNotEmpty()) {
+                        LiquidGlassButton(
+                            text = "PART DOWNLOAD (FILES)",
+                            onClick = {
+                                // open first mirror host page for selective files
+                                openUrl(partMirrors.first().url)
+                            },
+                            isPrimary = false,
+                            trailingIcon = Icons.Default.Folder,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    if (r.magnet.isNullOrBlank() && partMirrors.isEmpty()) {
+                        LiquidGlassButton(
+                            text = "OPEN FITGIRL PAGE",
+                            onClick = { openUrl(r.url) },
+                            isPrimary = false,
+                            trailingIcon = Icons.Default.OpenInNew,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                } else {
+                    LiquidGlassButton(
+                        text = "DOWNLOAD GAME",
+                        onClick = { onGetRepack() },
+                        isPrimary = false,
+                        trailingIcon = Icons.Default.Download,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (repackError.isNotBlank()) {
+                        Text(
+                            text = repackError,
+                            color = Color(0xFFFF8A80),
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                 }
 
@@ -489,12 +478,6 @@ fun GameDetailScreen(
                             value = game.publisher.ifBlank { "Steam" }
                         )
 
-                        DetailRow(
-                            icon = Icons.Default.LocalOffer,
-                            label = "Store Price",
-                            value = game.price.ifBlank { "Check Steam" },
-                            valueColor = FitmanColors.ElectricLime
-                        )
 
                         if (game.releaseDate.isNotBlank()) {
                             DetailRow(

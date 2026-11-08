@@ -92,7 +92,7 @@ fun SearchScreen(
                     letterSpacing = 2.sp
                 )
                 Text(
-                    text = if (catalogSource == "fitgirl") "FitGirl Repacks Search" else "Steam Global Catalogue Query",
+                    text = "Steam Global Catalogue Query",
                     color = FitmanColors.TextSecondary,
                     fontSize = 12.sp
                 )
@@ -112,29 +112,11 @@ fun SearchScreen(
             query = query,
             onQueryChange = onQueryChange,
             onSearch = onSearch,
-            placeholderText = if (catalogSource == "fitgirl") {
-                "Search FitGirl repacks..."
-            } else {
-                "Enter title, franchise, or genre..."
-            }
+            placeholderText = "Enter title, franchise, or genre..."
         )
 
         Spacer(Modifier.height(10.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            LiquidGlassChip(
-                label = "Steam",
-                isSelected = catalogSource == "steam",
-                onClick = { onCatalogSourceChange("steam") }
-            )
-            LiquidGlassChip(
-                label = "FitGirl",
-                isSelected = catalogSource == "fitgirl",
-                onClick = { onCatalogSourceChange("fitgirl") }
-            )
-        }
-
-        Spacer(Modifier.height(14.dp))
+Spacer(Modifier.height(14.dp))
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
