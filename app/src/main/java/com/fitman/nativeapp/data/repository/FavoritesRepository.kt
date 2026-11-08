@@ -3,6 +3,7 @@ package com.fitman.nativeapp.data.repository
 import android.content.Context
 import android.content.SharedPreferences
 import com.fitman.nativeapp.data.model.Game
+import com.fitman.nativeapp.data.model.LibraryStatus
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,6 +18,7 @@ class FavoritesRepository(context: Context) {
             val list = mutableListOf<Game>()
             for (i in 0 until arr.length()) {
                 val o = arr.optJSONObject(i) ?: continue
+                val statusStr = o.optString("libraryStatus", "FAVORITE")
                 list.add(
                     Game(
                         id = o.optInt("id"),
@@ -24,7 +26,8 @@ class FavoritesRepository(context: Context) {
                         image = o.optString("image"),
                         price = o.optString("price"),
                         url = o.optString("url"),
-                        tag = o.optString("tag")
+                        tag = o.optString("tag"),
+                        libraryStatus = LibraryStatus.fromString(statusStr)
                     )
                 )
             }
@@ -38,6 +41,10 @@ class FavoritesRepository(context: Context) {
         return getFavorites().any { it.id == id }
     }
 
+    fun getGameStatus(id: Int): LibraryStatus? {
+        return getFavorites().firstOrNull { it.id == id }?.libraryStatus
+    }
+
     fun toggleFavorite(game: Game): Boolean {
         val current = getFavorites().toMutableList()
         val index = current.indexOfFirst { it.id == game.id }
@@ -45,11 +52,22 @@ class FavoritesRepository(context: Context) {
             current.removeAt(index)
             false
         } else {
-            current.add(0, game)
+            current.add(0, game.copy(libraryStatus = LibraryStatus.FAVORITE))
             true
         }
         saveFavorites(current)
         return isNowFavorite
+    }
+
+    fun setGameStatus(game: Game, status: LibraryStatus) {
+        val current = getFavorites().toMutableList()
+        val index = current.indexOfFirst { it.id == game.id }
+        if (index >= 0) {
+            current[index] = current[index].copy(libraryStatus = status)
+        } else {
+            current.add(0, game.copy(libraryStatus = status))
+        }
+        saveFavorites(current)
     }
 
     fun removeFavorite(id: Int) {
@@ -68,6 +86,7 @@ class FavoritesRepository(context: Context) {
             o.put("price", g.price)
             o.put("url", g.url)
             o.put("tag", g.tag)
+            o.put("libraryStatus", g.libraryStatus.name)
             arr.put(o)
         }
         prefs.edit().putString("favorites_list", arr.toString()).apply()

@@ -26,13 +26,17 @@ Ultra-premium, futuristic iOS 45-inspired Liquid Glass & Obsidian Black Glassmor
    - Curated trending suggestions chips.
    - Dedicated liquid glass loading, empty, and retry error states.
 3. **Cinematic Game Details (`GameDetailScreen`)**:
-   - Full-bleed backdrop game artwork with smooth gradient readability mask.
-   - Floating action header with Back navigation and Favorite bookmark toggle.
+   - Full-bleed backdrop game artwork with smooth multi-stop gradient readability mask.
+   - Metacritic score badge with direct review linkage.
+   - Interactive 1080p Screenshot Gallery carousel with full-screen lightbox modal.
+   - Platform support badges (Windows PC, macOS, Steam Deck / Linux) and Gamepad Ready indicator.
+   - Expandable PC hardware requirements drawer (Minimum & Recommended specifications).
    - Structured glass cards for Developer, Publisher, Release Date, Store Price, and Genre tags.
    - Functional **"OPEN OFFICIAL STEAM STORE"** button launching the verified Steam page.
-4. **Offline Library & Bookmarks (`LibraryScreen`)**:
+4. **Categorized Offline Library & Playlists (`LibraryScreen`)**:
+   - Organized library status filtering: *All*, *Wishlist*, *Playing*, *Completed*, and *Favorites*.
+   - In-card category switcher allowing seamless status reassignment with real-time counters.
    - Local storage of favorite titles using persistent JSON repository.
-   - Real-time bookmark count badge and quick remove action.
    - Direct link to Explore when empty.
 5. **System & Visual Engine Settings (`SettingsScreen`)**:
    - Specular Edge Lighting toggle.

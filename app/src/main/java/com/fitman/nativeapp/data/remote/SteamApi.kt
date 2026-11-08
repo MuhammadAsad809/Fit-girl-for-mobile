@@ -2,6 +2,8 @@ package com.fitman.nativeapp.data.remote
 
 import com.fitman.nativeapp.data.model.Game
 import com.fitman.nativeapp.data.model.GameDetail
+import com.fitman.nativeapp.data.model.PlatformSupport
+import com.fitman.nativeapp.data.model.Screenshot
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.net.URLEncoder
@@ -133,14 +135,14 @@ object SteamApi {
         val rawImage = data.optString("header_image", "")
         val image = if (rawImage.isNotBlank()) rawImage else bestHeaderImage(id, "")
 
-        val rawDesc = data.optString("short_description", "")
+        val rawDesc = data.optString("short_description", "").ifBlank { data.optString("detailed_description", "") }
         val cleanDesc = if (rawDesc.isNotBlank()) Jsoup.parse(rawDesc).text() else "No description provided by publisher."
 
         val developers = data.optJSONArray("developers")
         val devStr = if (developers != null && developers.length() > 0) {
             (0 until developers.length()).map { developers.optString(it) }.joinToString(", ")
         } else {
-            "Independent"
+            "Independent Developer"
         }
 
         val publishers = data.optJSONArray("publishers")
@@ -170,6 +172,46 @@ object SteamApi {
             }
         }
 
+        // Metacritic score
+        val metaObj = data.optJSONObject("metacritic")
+        val metaScore = if (metaObj != null && metaObj.has("score")) metaObj.optInt("score") else null
+        val metaUrl = metaObj?.optString("url")
+
+        // Screenshots gallery
+        val ssArr = data.optJSONArray("screenshots")
+        val screenshotsList = mutableListOf<Screenshot>()
+        if (ssArr != null) {
+            for (i in 0 until ssArr.length()) {
+                val sObj = ssArr.optJSONObject(i) ?: continue
+                val sId = sObj.optInt("id", i)
+                val thumb = sObj.optString("path_thumbnail")
+                val full = sObj.optString("path_full")
+                if (full.isNotBlank()) {
+                    screenshotsList.add(Screenshot(sId, thumb.ifBlank { full }, full))
+                }
+            }
+        }
+
+        // Platform support
+        val platObj = data.optJSONObject("platforms")
+        val platforms = PlatformSupport(
+            windows = platObj?.optBoolean("windows", true) ?: true,
+            mac = platObj?.optBoolean("mac", false) ?: false,
+            linux = platObj?.optBoolean("linux", false) ?: false
+        )
+
+        // PC Requirements
+        val pcReq = data.optJSONObject("pc_requirements")
+        val minReqHtml = pcReq?.optString("minimum").orEmpty()
+        val recReqHtml = pcReq?.optString("recommended").orEmpty()
+        val minReq = if (minReqHtml.isNotBlank()) Jsoup.parse(minReqHtml).text() else ""
+        val recReq = if (recReqHtml.isNotBlank()) Jsoup.parse(recReqHtml).text() else ""
+
+        // Controller support & recommendations
+        val controllerSupport = data.optString("controller_support", "")
+        val recCount = data.optJSONObject("recommendations")?.optInt("total", 0) ?: 0
+        val bgImage = data.optString("background_raw", "").ifBlank { data.optString("background", "") }
+
         return GameDetail(
             id = id,
             title = title,
@@ -180,7 +222,16 @@ object SteamApi {
             price = priceStr,
             url = "https://store.steampowered.com/app/$id/",
             releaseDate = releaseDate,
-            genres = genresList
+            genres = genresList,
+            metacriticScore = metaScore,
+            metacriticUrl = metaUrl,
+            screenshots = screenshotsList,
+            platforms = platforms,
+            pcRequirementsMin = minReq,
+            pcRequirementsRec = recReq,
+            controllerSupport = controllerSupport,
+            recommendationsCount = recCount,
+            backgroundImage = bgImage
         )
     }
 }

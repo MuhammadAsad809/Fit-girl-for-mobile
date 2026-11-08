@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.fitman.nativeapp.data.model.Game
 import com.fitman.nativeapp.data.model.GameDetail
+import com.fitman.nativeapp.data.model.LibraryStatus
 import com.fitman.nativeapp.data.remote.SteamApi
 import com.fitman.nativeapp.data.repository.FavoritesRepository
 import com.fitman.nativeapp.data.repository.SettingsRepository
@@ -224,12 +225,19 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                     val detail = gameDetail
                     if (detail != null) {
                         val isFav = favoritesList.any { it.id == detail.id }
+                        val currentStatus = favoritesList.firstOrNull { it.id == detail.id }?.libraryStatus
                         GameDetailScreen(
                             game = detail,
                             isFavorite = isFav,
+                            currentStatus = currentStatus,
                             onToggleFavorite = {
                                 val current = selectedGame ?: return@GameDetailScreen
                                 favoritesRepo.toggleFavorite(current)
+                                favoritesList = favoritesRepo.getFavorites()
+                            },
+                            onStatusChange = { newStatus ->
+                                val current = selectedGame ?: return@GameDetailScreen
+                                favoritesRepo.setGameStatus(current, newStatus)
                                 favoritesList = favoritesRepo.getFavorites()
                             },
                             onBack = {
@@ -291,6 +299,10 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                             LibraryScreen(
                                 favorites = favoritesList,
                                 onGameClick = { game -> openGameDetails(game) },
+                                onStatusChange = { game, newStatus ->
+                                    favoritesRepo.setGameStatus(game, newStatus)
+                                    favoritesList = favoritesRepo.getFavorites()
+                                },
                                 onRemoveFavorite = { game ->
                                     favoritesRepo.removeFavorite(game.id)
                                     favoritesList = favoritesRepo.getFavorites()

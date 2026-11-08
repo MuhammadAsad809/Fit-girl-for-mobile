@@ -49,10 +49,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.0.0-liquid-glass
-          name: "Fitman Native v2.0 (Liquid Glass Edition)"
+          tag_name: v2.1.0-expanded-catalogue
+          name: "Fitman Native v2.1 (Expanded Metadata & Screenshots Edition)"
           body: |
-            ## Fitman Native v2.0 — Liquid Glass Edition
+            ## Fitman Native v2.1 — Expanded Gaming Catalogue & Screenshots
+            
+            Enhanced edition featuring Metacritic integration, 1080p screenshot gallery lightbox, platform pills, and categorized library playlists.
+            
+            ### Highlights:
+            - **Metacritic Score Integration**: Live Metacritic rating badge with direct score reviews.
+            - **1080p Screenshot Gallery**: Horizontal interactive thumbnail carousel with full-screen lightbox modal.
+            - **Platform & Controller Support**: Windows PC, macOS, Steam Deck / Linux, and Gamepad badges.
+            - **Categorized Library**: Playlist organizing by Wishlist, Currently Playing, Completed, and Favorites.
+            - **Hardware Specs**: Expandable minimum & recommended PC hardware requirements.
+            - **Liquid Glass Design System**: Deep obsidian glass, specular edge highlights, and electric lime accents.
             
             Futuristic iOS 45-inspired Obsidian Black Glassmorphism Game Discovery App for Android.
             
