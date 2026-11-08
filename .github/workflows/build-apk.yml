@@ -49,8 +49,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v2.1.0-expanded-catalogue
-          name: "Fitman Native v2.1 (Expanded Metadata & Screenshots Edition)"
+          tag_name: v2.1-${{ github.run_number }}
+          name: "Fitman Native v2.1 Build ${{ github.run_number }}"
           body: |
             ## Fitman Native v2.1 — Expanded Gaming Catalogue & Screenshots
             
