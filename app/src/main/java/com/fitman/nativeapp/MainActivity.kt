@@ -34,6 +34,7 @@ import com.fitman.nativeapp.data.model.Game
 import com.fitman.nativeapp.data.model.GameDetail
 import com.fitman.nativeapp.data.model.LibraryStatus
 import com.fitman.nativeapp.data.remote.FitGirlApi
+import com.fitman.nativeapp.data.remote.FitGirlDetail
 import com.fitman.nativeapp.data.remote.SteamApi
 import com.fitman.nativeapp.data.repository.FavoritesRepository
 import com.fitman.nativeapp.data.repository.SettingsRepository
@@ -100,6 +101,9 @@ fun FitmanApp(openUrl: (String) -> Unit) {
     var selectedGame by remember { mutableStateOf<Game?>(null) }
     var gameDetail by remember { mutableStateOf<GameDetail?>(null) }
     var detailLoading by remember { mutableStateOf(false) }
+    var repackLoading by remember { mutableStateOf(false) }
+    var repackError by remember { mutableStateOf("") }
+    var repackDetail by remember { mutableStateOf<FitGirlDetail?>(null) }
 
     // Favorites State
     var favoritesList by remember { mutableStateOf(favoritesRepo.getFavorites()) }
@@ -185,6 +189,9 @@ fun FitmanApp(openUrl: (String) -> Unit) {
         selectedGame = game
         gameDetail = null
         detailLoading = true
+        repackDetail = null
+        repackError = ""
+        repackLoading = false
         scope.launch {
             try {
                 val detail = withContext(Dispatchers.IO) {
@@ -225,6 +232,29 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                 )
             } finally {
                 detailLoading = false
+            }
+        }
+    }
+
+    fun loadRepackForCurrent() {
+        val title = gameDetail?.title ?: selectedGame?.title ?: return
+        repackLoading = true
+        repackError = ""
+        repackDetail = null
+        scope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    FitGirlApi.findRepackForTitle(title)
+                }
+                if (result == null) {
+                    repackError = "No FitGirl repack found for this title."
+                } else {
+                    repackDetail = result
+                }
+            } catch (e: Exception) {
+                repackError = e.message ?: "Failed to fetch repack links."
+            } finally {
+                repackLoading = false
             }
         }
     }
@@ -284,7 +314,11 @@ fun FitmanApp(openUrl: (String) -> Unit) {
                                 selectedGame = null
                                 gameDetail = null
                             },
-                            openUrl = openUrl
+                            openUrl = openUrl,
+                            onGetRepack = { loadRepackForCurrent() },
+                            repackLoading = repackLoading,
+                            repackError = repackError,
+                            repack = repackDetail
                         )
                     }
                 }

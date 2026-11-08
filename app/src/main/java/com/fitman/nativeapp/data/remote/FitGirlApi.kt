@@ -207,7 +207,32 @@ object FitGirlApi {
         val slug = url.trimEnd('/').substringAfterLast('/')
         return (slug.hashCode() and 0x7FFFFFFF).let { if (it == 0) 1 else it }
     }
+
+    /**
+     * Match a Steam-style title to a FitGirl repack detail (magnet + mirrors).
+     */
+    fun findRepackForTitle(steamTitle: String): FitGirlDetail? {
+        val q = steamTitle
+            .replace(Regex("""\s*[\(\[][^\)\]]*[\)\]]"""), " ")
+            .replace(Regex("""\b(GOTY|Edition|Deluxe|Ultimate|Remastered|Remake|HD|Complete)\b""", RegexOption.IGNORE_CASE), " ")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
+        if (q.length < 2) return null
+        val results = search(q, limit = 8)
+        if (results.isEmpty()) return null
+        val qLower = q.lowercase()
+        val best = results.maxByOrNull { g ->
+            val t = g.title.lowercase()
+            when {
+                t.startsWith(qLower) -> 100
+                t.contains(qLower) -> 80
+                else -> qLower.split(" ").count { w -> w.length > 2 && t.contains(w) } * 10
+            }
+        } ?: results.first()
+        return detail(best.url)
+    }
 }
+
 
 data class MirrorLink(
     val name: String,

@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Gamepad
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.OpenInNew
@@ -61,6 +63,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.fitman.nativeapp.data.model.GameDetail
+import com.fitman.nativeapp.data.remote.FitGirlDetail
+import com.fitman.nativeapp.data.remote.MirrorLink
 import com.fitman.nativeapp.data.model.LibraryStatus
 import com.fitman.nativeapp.data.model.Screenshot
 import com.fitman.nativeapp.ui.components.LiquidGlassButton
@@ -79,6 +83,10 @@ fun GameDetailScreen(
     onStatusChange: (LibraryStatus) -> Unit,
     onBack: () -> Unit,
     openUrl: (String) -> Unit,
+    onGetRepack: () -> Unit = {},
+    repackLoading: Boolean = false,
+    repackError: String = "",
+    repack: FitGirlDetail? = null,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -264,6 +272,80 @@ fun GameDetailScreen(
                     trailingIcon = Icons.Default.OpenInNew,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                LiquidGlassButton(
+                    text = if (repackLoading) "SEARCHING FITGIRL..." else "GET REPACK DOWNLOAD",
+                    onClick = { if (!repackLoading) onGetRepack() },
+                    isPrimary = false,
+                    trailingIcon = Icons.Default.Download,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (repackError.isNotBlank()) {
+                    Text(
+                        text = repackError,
+                        color = Color(0xFFFF8A80),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                repack?.let { r ->
+                    LiquidGlassCard(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                text = "FITGIRL REPACK",
+                                color = FitmanColors.ElectricLime,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = r.title,
+                                color = FitmanColors.TextPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            if (!r.magnet.isNullOrBlank()) {
+                                LiquidGlassButton(
+                                    text = "OPEN MAGNET LINK",
+                                    onClick = { openUrl(r.magnet!!) },
+                                    isPrimary = true,
+                                    trailingIcon = Icons.Default.Link,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            if (r.mirrors.isNotEmpty()) {
+                                Text(
+                                    text = "MIRRORS",
+                                    color = FitmanColors.TextSecondary,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                r.mirrors.forEach { m: MirrorLink ->
+                                    LiquidGlassButton(
+                                        text = m.name.ifBlank { "Mirror" },
+                                        onClick = { openUrl(m.url) },
+                                        isPrimary = false,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                            LiquidGlassButton(
+                                text = "OPEN FITGIRL PAGE",
+                                onClick = { openUrl(r.url) },
+                                isPrimary = false,
+                                trailingIcon = Icons.Default.OpenInNew,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
 
                 // Library Status Selector
                 LiquidGlassCard(
